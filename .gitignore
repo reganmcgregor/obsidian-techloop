@@ -1,0 +1,16 @@
+# Obsidian workspace state (changes constantly, not meaningful to version)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+.obsidian/plugins/*/data.json
+
+# Obsidian trash
+.trash/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Sync metadata (managed by ob, not git)
+.obsidian/sync.json
