@@ -9,7 +9,9 @@ Migrating techloop.com.au from self-hosted WooCommerce to **Shopify Basic**. DNS
 - Phases 0–8: **Done** (catalog, redirects, customers, theme, channels, shipping/payments, cutover).
 - **Phase 9 (Inventory) — ✅ Done (2026-05-30):** TL_Mirror_Shopify + TL_Inventory_Syncer_Shopify both **live**. Syncer first full run synced 387 products (238 corrections + 149 zero-outs), 0 failed. Scope = Mirror + Syncer only.
 - **Phase 10 (Onboarding) — ✅ Done (2026-05-31):** Detector (`fz50fq1dCmrHhazX`, active) + Publisher (`pgWWBz9f6RXLXEIe`, built+verified, **inactive** pending user go-live) + Slack Handler (`hikIeVV081e76pEv`, active). Category map fully resolved (426 approved / 0 pending); onboarding view yields 771 products. Only remaining = flip Publisher active. See [[Phase 10 — Workflow Rebuild Tier 2 (Onboarding)]].
-- Phase 11 Enrichment, 12 Alerts/Utilities, 13 WC decom — Not Started.
+- **Phase 11 (Enrichment) — In Progress:** 11.A bulk backfill ✅ (992 products, 2026-06-17). 11.B reactivating frozen enrichment chain (in separate session).
+- **Phase 12 (Alerts/Utilities) — ✅ Done (2026-06-18):** TL_Price_Watchdog (`yExNIbiIGVFOoJ4N`) rebuilt for Shopify + "Set to RRP" Slack button. TL_Queue_Reviewer_Shopify (`20i0wyIaAnu9h2Wh`) already active.
+- Phase 13 WC decom — Not Started.
 
 ## Shopify store
 - **Admin API host:** `techloop-7.myshopify.com` (works for token-based Admin GraphQL; API version `2025-07`). Permanent domain is `zc30tg-fi.myshopify.com` — required for **OAuth-callback** flows (we don't use those); fine to prefer it for durability.
