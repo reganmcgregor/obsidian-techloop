@@ -32,8 +32,8 @@ Schedule Trigger (6 AM daily)
   → Capture Start Time
   → Get Low Margin Products   [Postgres: SELECT * FROM vw_low_margin_products]
   → Check for Alerts          [IF: count > 0]
-      → Format Slack Blocks   [Code: builds Block Kit with action buttons]
-          → Send Slack        [Slack: #price-watchdog, C0ADF089R3M]
+      → Format Slack Blocks   [Code: builds one item per product + 1 summary item]
+          → Send Slack        [Slack: #price-watchdog, C0ADF089R3M — sends N messages, one per item]
 ```
 
 ---
@@ -59,18 +59,24 @@ Schedule Trigger (6 AM daily)
 
 ## Slack Message Format
 
-Each product renders two blocks:
+Each run sends **N+1 separate Slack messages** to `#price-watchdog`:
 
+**Message 1 — Summary header:**
+```
+[header]   🚨 Price Watchdog Alert
+[section]  Critical: X  |  Warning: X  |  Total Issues: X  |  Showing top 12
+[context]  Synced: HH:MM AM AEST
+```
+
+**Messages 2–13 — One per product (up to 12):**
 ```
 [section]  🔴 *SKU* — Product Name
            Price: $X | Cost: $X | Margin: X% | RRP: $X
 [actions]  [Edit in Shopify]  [Set to RRP $X.XX]
-[divider]
 ```
 
-- Max 15 products shown per message (Slack block limit avoidance)
-- Header block shows CRITICAL / WARNING / Total counts
-- Context block shows timestamp (AEST)
+- Max 12 products shown as individual cards (no block-limit concern — 2 blocks per card)
+- Clicking "Set to RRP" replaces **only that card** with a confirmation (`replace_original: true` targets the specific message)
 
 **"Edit in Shopify" button:** URL button → `https://admin.shopify.com/store/techloop-7/products/{shopify_id}`
 
@@ -78,6 +84,7 @@ Each product renders two blocks:
 - `action_id: "set_price_to_rrp"`
 - `value`: compact JSON `{"vGid":"...","pGid":"...","rrp":"X.XX","sku":"..."}`
 - Handled by `TL_Slack_Interaction_Handler_Shopify` (`hikIeVV081e76pEv`)
+- On success: card replaced with `:white_check_mark: Price updated to $X.XX (RRP) for *SKU* by @user`
 
 ---
 
@@ -124,6 +131,12 @@ Set Price Get Token   [HTTP POST → Shopify OAuth token endpoint]
 | Product link | WP Admin edit URL | Shopify Admin URL |
 | Edit button | "Edit Product" → WP admin | "Edit in Shopify" → Shopify admin |
 | RRP button | None | "Set to RRP $X.XX" → GraphQL price update |
+
+---
+
+## Related
+
+- **[[ONE-OFF] TL_Bulk_RRP_Update** (`meFlEpSpYdAw7cmN`) — one-off webhook-triggered workflow that bulk-sets all low-margin products to their leader RRP in Shopify + mirrors. Run once to correct historical pricing; trigger manually via webhook.
 
 ---
 
