@@ -24,7 +24,8 @@ Migration of techloop.com.au from WooCommerce (self-hosted) to Shopify Basic.
 - [[Phase 7 — Shipping & Payments]] — Done — Shopify Payments live (Stripe disabled), shipping config + page live, Afterpay under review
 - [[Phase 8 — Cutover]] — Done — DNS flipped 2026-05-24; www.techloop.com.au is primary, .myshopify auto-301s, apex SSL provisioning in flight
 - [[Phase 9 — Workflow Rebuild Tier 1 (Inventory)]] — ✅ Done — TL_Mirror_Shopify + TL_Inventory_Syncer_Shopify both live
-- [[Phase 10 — Workflow Rebuild Tier 2 (Onboarding)]] — ✅ Done (2026-05-31) — Detector + Publisher + Slack Handler built; category map resolved (426 approved); view yields 771 products; awaiting user go-live (activate Publisher)
+- [[Phase 10 — Workflow Rebuild Tier 2 (Onboarding)]] — ✅ Done — Detector + Publisher + Slack Handler all active; onboarding pipeline live (Publisher activated 2026-06-06)
+- [[Phase 11 — Workflow Rebuild Tier 3 (Enrichment)]] — In Progress — Attribute mapping audit → bulk backfill → enrichment chain rebuild
 - [[Attribute Strategy (deferred)]] — captured brainstorm decisions for Phase 11 rebuild (post-launch); not yet specced
 - [[Shopify Linked Products Research]] — Pattern 3 (Metaobject Product Group) — deferred to Phase 5b
 - [[Shopify Migration Considerations]] — Pre-decision impact assessment (historical reference only)
@@ -34,7 +35,7 @@ Migration of techloop.com.au from WooCommerce (self-hosted) to Shopify Basic.
 
 ---
 
-## Status (as of 2026-05-23)
+## Status (as of 2026-06-06)
 
 ### Phase table
 
@@ -51,8 +52,8 @@ Migration of techloop.com.au from WooCommerce (self-hosted) to Shopify Basic.
 | 7 | Shipping & Payments | Done | Shopify Payments live (Stripe disabled), shipping config + page live, Afterpay under review. See [[Phase 7 — Shipping & Payments]] |
 | 8 | Cutover | Done | DNS flipped 2026-05-24. www.techloop.com.au primary, .myshopify auto-301s. Apex cert provisioning in flight. See [[Phase 8 — Cutover]] |
 | 9 | Workflow Rebuild Tier 1 — Inventory | ✅ Done (2026-05-30) | **TL_Mirror_Shopify** (`B6BBVJkRRCZP69HW`) + **TL_Inventory_Syncer_Shopify** (`uQ6XmGi3mspxKD56`) both **live**. Syncer first full run: 387 synced (238 corrections + 149 zero-outs), 0 failed; controlled 5-product test verified on live Shopify. Prerequisite **TL_Ingest_Leader_Feed reactivated** (`mUkhS0BfN7Lq6EsS`). Scope = Mirror + Syncer only (Detector → Phase 10). See [[Phase 9 — Workflow Rebuild Tier 1 (Inventory)]] |
-| 10 | Workflow Rebuild Tier 2 — Onboarding | ✅ Done (2026-05-31) | **TL_Product_Detector_Shopify** (`fz50fq1dCmrHhazX`, active) + **TL_Product_Publisher_Shopify** (`pgWWBz9f6RXLXEIe`, built+verified, **inactive** pending go-live) + **TL_Slack_Interaction_Handler_Shopify** (`hikIeVV081e76pEv`, active). Category map fully resolved (426 approved / 0 pending); onboarding view yields **771 products**. Only remaining = flip Publisher active. See [[Phase 10 — Workflow Rebuild Tier 2 (Onboarding)]] |
-| 11 | Workflow Rebuild Tier 3 — Enrichment | Not Started | TL_Enrich_Attributes_Shopify → metafields |
+| 10 | Workflow Rebuild Tier 2 — Onboarding | ✅ Done | **TL_Product_Detector_Shopify** (`fz50fq1dCmrHhazX`, active) + **TL_Product_Publisher_Shopify** (`pgWWBz9f6RXLXEIe`, **active** 2026-06-06) + **TL_Slack_Interaction_Handler_Shopify** (`hikIeVV081e76pEv`, active). Category map fully resolved (426 approved / 0 pending); onboarding pipeline live. See [[Phase 10 — Workflow Rebuild Tier 2 (Onboarding)]] |
+| 11 | Workflow Rebuild Tier 3 — Enrichment | In Progress | 11.0 (mapping audit) + 11.A (bulk backfill — 992 products, 2026-06-17) ✅ complete. 11.B (reactivate frozen enrichment workflows) ready to start. See [[Phase 11 — Workflow Rebuild Tier 3 (Enrichment)]] |
 | 12 | Workflow Rebuild Tier 4 — Alerts/Utilities | Not Started | TL_Queue_Reviewer, TL_Price_Watchdog, etc. |
 | 13 | Decommission WooCommerce | Not Started | Take WC offline once all workflows green |
 | 14 | Shopify-native AI integrations | Not Started | Post-launch MCP connectors, AI taxonomies |

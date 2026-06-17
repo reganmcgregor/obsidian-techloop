@@ -6,7 +6,7 @@ notion_teamspace: engineering
 canonical: obsidian
 department: engineering
 type: project-spec
-synced_at: 2026-05-31T00:00:00Z
+synced_at: 2026-05-31T08:00:00Z
 ---
 
 # Phase 10 — Workflow Rebuild Tier 2 (Onboarding)
@@ -22,7 +22,7 @@ Second tier of the n8n rebuild after the WC→Shopify cutover: the **new-product
 | Workflow | Status | n8n id | Schedule / Trigger |
 |---|---|---|---|
 | TL_Product_Detector_Shopify | ✅ Done, tested, **active** | `fz50fq1dCmrHhazX` | `45 */2 * * *` |
-| TL_Product_Publisher_Shopify | ✅ Built + live-verified, **inactive** (user activates at go-live) | `pgWWBz9f6RXLXEIe` | `*/5 * * * *` |
+| TL_Product_Publisher_Shopify | ✅ **Active** (activated 2026-06-06) | `pgWWBz9f6RXLXEIe` | `*/5 * * * *` |
 | TL_Slack_Interaction_Handler_Shopify | ✅ Built + verified, **active** | `hikIeVV081e76pEv` | webhook `/webhook/slack-interaction` |
 
 All three are clone-and-modify from FROZEN WC originals (Detector ← `rnUjGGsdD1jdaFIg`, Handler ← `rDloLTYACT56kfpn`); FROZEN kept for rollback.
@@ -41,7 +41,7 @@ Publisher (every 5m) → fetch approved → lock → fresh Leader data (+ catego
 Handler (webhook)    → Publish Now → productUpdate status=ACTIVE + publishablePublish (Online Store) → queue status=live → Slack confirm
 ```
 
-Image-processing/staging chains in the Publisher are intentionally **orphaned** (v1 sideloads the remote Leader image URL via `productSet input.files`; Shopify fetches it async).
+Image pipeline is fully active: Download → square + white-pad (10%) → cap 2048px → `stagedUploadsCreate` (PUT) → `Merge Upload Data` → `Upload Image to Staged URL` → `Capture Staged Resource URL` → attached via `input.files[].originalSource`. Falls back to raw `leader.image_url` only if download fails.
 
 ---
 
@@ -70,6 +70,9 @@ The onboarding view also respects `tl_category_map.is_blocked` / `tl_brand_map.i
 
 ## Build learnings / gotchas
 
+- **Staged upload uses `httpMethod: 'PUT'`** (not POST multipart): Shopify/GCS returns 7–9 dynamic form parameters for POST — hardcoding the count breaks silently. PUT sends the binary as the body with `Content-Type: image/jpeg` only — no parameters needed.
+- **Binary lost after `stagedUploadsCreate`**: HTTP Request nodes strip input binary from their output. A `Merge Upload Data` Code node between `stagedUploadsCreate` and the PUT re-attaches the processed binary via `$('Build stagedUploadsCreate Vars').first().binary`.
+- **`Get Shopify Token` gates image chain**: `Get Shopify Token` → `Download Image` (explicit connection) ensures the token is available before `stagedUploadsCreate` runs.
 - **`patchNodeField` find/replace mangles `$` in the replacement string** (`$'`, `$&`, `$1`… are JS replacement tokens) — corrupted a regex end-anchor into a Postgres query. For any value containing `$`, use `updateNode` with COMPLETE parameters (+ credentials), which stores the string verbatim.
 - **Postgres `executeQuery` `query` field resolves inline `{{ }}` natively without a `=` prefix** — the n8n-mcp "Mixed literal … requires = prefix" error is a **false positive** for SQL-editor fields; match the existing live-verified sibling nodes (no `=`).
 - `productUpdate(input:…)` is deprecated in 2025-07 → use `productUpdate(product: ProductUpdateInput)`. Schema-validated via shopify-mcp.
@@ -79,11 +82,9 @@ The onboarding view also respects `tl_category_map.is_blocked` / `tl_brand_map.i
 
 ---
 
-## Go-live (remaining — user trigger)
+## Go-live — ✅ Complete (2026-06-06)
 
-1. **Activate `TL_Product_Publisher_Shopify`** (`pgWWBz9f6RXLXEIe`) — Handler is already active.
-2. Detector enqueues from the 771; Publisher drafts every 5 min and posts to `#product-publisher` with a Publish button.
-3. **Recommended:** watch the *first* drafted product land in Slack and eyeball it on the store before letting it run at volume.
+Publisher activated 2026-06-06. Detector enqueuing from the 771-product onboarding view; Publisher drafting every 5 min and posting to `#product-publisher` with Publish button. Pipeline live.
 
 ## Out of scope / follow-ups
 
