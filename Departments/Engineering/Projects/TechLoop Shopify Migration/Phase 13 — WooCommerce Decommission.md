@@ -118,7 +118,7 @@ Phase 13 is fully closed.
 
 ### Cosmetic WC-named leftovers (deferred to enrichment project)
 
-The items below carry WC-derived names but have **no runtime WC dependency** — they are mapping keys, a Slack action ID, JS variable names, or dormant unused columns. They do not affect the live stack and are deferred to the [[Enrichment Redesign & Metafield Reconciliation]] project.
+The items below carry WC-derived names but have **no runtime WC dependency** — they are mapping keys, a Slack action ID, JS variable names, or dormant unused columns. They do not affect the live stack and are deferred to the [[Phase 14 — Enrichment Service Rebuild]] project.
 
 - `tl_attribute_mapping.wc_attribute_id` and `wc_slug` — mapping-key columns (no FK, no WC API call)
 - `tl_product_attributes.wc_attribute_id` — retained mapping reference
