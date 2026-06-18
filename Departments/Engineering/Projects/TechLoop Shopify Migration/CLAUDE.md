@@ -9,7 +9,7 @@ Migrating techloop.com.au from self-hosted WooCommerce to **Shopify Basic**. DNS
 - Phases 0–8: **Done** (catalog, redirects, customers, theme, channels, shipping/payments, cutover).
 - **Phase 9 (Inventory) — ✅ Done (2026-05-30):** TL_Mirror_Shopify + TL_Inventory_Syncer_Shopify both **live**. Syncer first full run synced 387 products (238 corrections + 149 zero-outs), 0 failed. Scope = Mirror + Syncer only.
 - **Phase 10 (Onboarding) — ✅ Done (2026-05-31):** Detector (`fz50fq1dCmrHhazX`, active) + Publisher (`pgWWBz9f6RXLXEIe`, built+verified, **inactive** pending user go-live) + Slack Handler (`hikIeVV081e76pEv`, active). Category map fully resolved (426 approved / 0 pending); onboarding view yields 771 products. Only remaining = flip Publisher active. See [[Phase 10 — Workflow Rebuild Tier 2 (Onboarding)]].
-- **Phase 11 (Enrichment) — In Progress:** 11.A bulk backfill ✅ (992 products, 2026-06-17). 11.B reactivating frozen enrichment chain (in separate session).
+- **Phase 11 (Enrichment) — ✅ Done (2026-06-18):** 11.A bulk backfill (992 products) + 11.B chain fully reactivated. Supabase-backed attr mapping (335 attrs = 170 WC-backed + 165 Shopify-native; `tl_attribute_mapping` + `tl_shopify_metaobject_values`); `auto_approved` safety gate (never auto-pushes to live store); Pusher handles WC-backed + Shopify-native attrs with correct namespace; 5 enrichment workflows live; review queue cleared (200 approved, 14 rejected).
 - **Phase 12 (Alerts/Utilities) — ✅ Done (2026-06-18):** TL_Price_Watchdog (`yExNIbiIGVFOoJ4N`) rebuilt for Shopify + "Set to RRP" Slack button. TL_Queue_Reviewer_Shopify (`20i0wyIaAnu9h2Wh`) already active.
 - Phase 13 WC decom — Not Started.
 
@@ -27,9 +27,15 @@ Migrating techloop.com.au from self-hosted WooCommerce to **Shopify Basic**. DNS
 ## Workflows (n8n ids)
 - **TL_Mirror_Shopify** `B6BBVJkRRCZP69HW` — live, schedule `15 */4 * * *`.
 - **TL_Inventory_Syncer_Shopify** `uQ6XmGi3mspxKD56` — **live**, `30 */3 * * *`. Writes stock/cost/supplier_status to Shopify via aliased GraphQL mutations. Diff has a feed-staleness guard (no-ops if the whole feed is >12h stale).
-- **TL_Ingest_Leader_Feed** `mUkhS0BfN7Lq6EsS` — ✅ reactivated 2026-05-30 (every 2h, feed fresh). Was frozen at cutover; the Syncer depends on it. The other "no change" upstream workflows (scraper/discoverer/enrich/HITL-handler/queue-reviewer) are still frozen — reactivate at their phase (see Notion Tier-0 task).
-- FROZEN WC originals (kept for rollback): TL_Mirror_WooCommerce `hEUnN85kXJZEG3qZ`, TL_Inventory_Syncer `ZgqlMhNqh3TJMB6G`, TL_Product_Detector `rnUjGGsdD1jdaFIg`.
-- Slack interaction handler `rDloLTYACT56kfpn`.
+- **TL_Ingest_Leader_Feed** `mUkhS0BfN7Lq6EsS` — ✅ reactivated 2026-05-30 (every 2h, feed fresh).
+- **TL_URL_Discoverer** `QQMwVzR5c79Nx3RL` — ✅ reactivated 2026-06-18, LIMIT 50 candidates.
+- **TL_Scraper** `b4rR1gwQ25uUJkEQ` — ✅ reactivated 2026-06-18 (Crawl4AI at `http://crawl4ai:11235/crawl`).
+- **TL_Enrich_Attributes** `lq8960K0xVwF3Xst` — ✅ reactivated 2026-06-18 (`*/15 * * * *`). Shopify-vocab-aware; writes `auto_approved` (not `approved`) for high-confidence promoted attrs.
+- **TL_Attribute_Proposer** `hUGA1KFWBTGU8K6T` — ✅ reactivated 2026-06-18.
+- **TL_Enrichment_Reviewer** `OarmHP6DpJvAV0Pb` — ✅ reactivated 2026-06-18. Fetches `pending` + `auto_approved`; shows 🤖 Auto / ⏳ Pending label.
+- **TL_Attribute_Pusher_Shopify** `s06MMF8cRDi0DXhj` — webhook-triggered. Reads mapping from `tl_attribute_mapping` + `tl_shopify_metaobject_values`; handles WC-backed attrs (`wc_attribute_id IS NOT NULL`) and Shopify-native attrs (`shopify_key IS NOT NULL`).
+- **TL_Slack_Interaction_Handler_Shopify** `hikIeVV081e76pEv` — `approve_attr_mapping` fires Pusher; fixed double-encoding + stray connection key.
+- FROZEN WC originals (delete in Phase 13): TL_Mirror_WooCommerce `hEUnN85kXJZEG3qZ`, TL_Inventory_Syncer `ZgqlMhNqh3TJMB6G`, TL_Product_Detector `rnUjGGsdD1jdaFIg`, Slack handler `rDloLTYACT56kfpn`.
 
 ## Supabase mirror tables
 `tl_shopify_products_mirror` (+ `supplier_*` cols), `tl_shopify_variants_mirror` (+ `unit_cost`), `tl_shopify_inventory_levels_mirror` (FK `location_id → tl_shopify_locations_mirror.shopify_id`, FK `variant_id → variants.shopify_id`), `tl_shopify_locations_mirror` (seeded), `tl_feed_leader_raw`, `tl_product_supplier_status` (re-keyed on `(supplier_product_id, supplier_name)`), `tl_onboarding_queue`, `tl_workflow_executions`. View `vw_new_products_for_shopify_onboarding` (Phase-10 prep; excludes both mirrors).

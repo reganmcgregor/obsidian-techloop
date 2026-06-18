@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 notion_page_id: null
 notion_parent_id: 3558c3d3-c03e-8164-9b2c-ff4243c5147a
 notion_teamspace: engineering
@@ -33,7 +33,7 @@ Third tier of the n8n rebuild: push existing Supabase-stored, HITL-reviewed attr
 |---|---|---|---|
 | 11.0 | Attribute Mapping Audit | **Complete** (2026-06-11) | — |
 | 11.A | Bulk Backfill | **Complete** (2026-06-17) | 11.0 |
-| 11.B | Ongoing Enrichment Rebuild | **Ready to start** | 11.A ✅ |
+| 11.B | Ongoing Enrichment Rebuild | **Complete** (2026-06-18) | 11.A ✅ |
 | 11.C | Targeted Scrape for Gaps | Optional | 11.A audit Sheet |
 
 ---
@@ -222,12 +222,12 @@ The `TL_Product_Publisher_Shopify` AI title/description node hallucinated a mode
 
 | Workflow | Sub-phase | Status | n8n ID |
 |---|---|---|---|
-| TL_Attribute_Pusher_Shopify | 11.A + 11.B | **Active — backfill complete 2026-06-17** | `s06MMF8cRDi0DXhj` |
-| TL_URL_Discoverer | 11.B | Frozen — verify + reactivate | (WC original) |
-| TL_Scraper | 11.B | Frozen — verify + reactivate | (WC original) |
-| TL_Enrich_Attributes | 11.B | Frozen — verify + reactivate | (WC original) |
-| TL_Attribute_Proposer | 11.B | Frozen — verify + reactivate | (WC original) |
-| TL_Enrichment_Reviewer | 11.B | Frozen — verify + reactivate | (WC original) |
+| TL_Attribute_Pusher_Shopify | 11.A + 11.B | **Active** (webhook) — Supabase-backed mapping, handles WC-backed + Shopify-native attrs | `s06MMF8cRDi0DXhj` |
+| TL_URL_Discoverer | 11.B | **Active** (reactivated 2026-06-18, LIMIT 50) | `QQMwVzR5c79Nx3RL` |
+| TL_Scraper | 11.B | **Active** (reactivated 2026-06-18) | `b4rR1gwQ25uUJkEQ` |
+| TL_Enrich_Attributes | 11.B | **Active** `*/15 * * * *` (reactivated 2026-06-18) — Shopify-vocab-aware, writes `auto_approved` | `lq8960K0xVwF3Xst` |
+| TL_Attribute_Proposer | 11.B | **Active** (reactivated 2026-06-18) | `hUGA1KFWBTGU8K6T` |
+| TL_Enrichment_Reviewer | 11.B | **Active** (reactivated 2026-06-18) — surfaces `pending` + `auto_approved` | `OarmHP6DpJvAV0Pb` |
 
 ---
 
@@ -244,11 +244,12 @@ The `TL_Product_Publisher_Shopify` AI title/description node hallucinated a mode
 
 ---
 
-## Definition of Done
+## Definition of Done — Achieved (2026-06-18)
 
-- [ ] 11.0: SHOPIFY_KEY_OVERRIDES updated; HITL Sheet reviewed; keep-custom defs created in Shopify
-- [ ] 11.A: All 1,209 products have Shopify metafields written; audit Sheet generated
-- [ ] 11.B: All 5 upstream workflows reactivated; Handler `map_to_existing` re-pointed at Pusher; Publisher AI prompt tuned
-- [ ] Smart collections auto-populated from new metafield values (verify by inspecting a degraded collection post-backfill)
+All sub-phases complete. Key outcomes:
 
-Note: per vault convention, these items belong in the Notion Tasks (Engineering) DB — not as inline checkboxes.
+- 11.0: 335-attr mapping locked (170 WC-backed + 165 Shopify-native) in `tl_attribute_mapping`; vocab seeded in `tl_shopify_metaobject_values` (461 rows).
+- 11.A: 992 products backfilled to Shopify metafields. Smart collections auto-populated.
+- 11.B: 5 enrichment workflows reactivated; `auto_approved` safety gate in place; Pusher Supabase-backed; Handler `approve_attr_mapping` fires Pusher; Publisher AI prompt-tuned to prevent model-number hallucination. Review queue cleared (200 approved, 14 rejected).
+
+Deferred to Phase 13 or later: `list.single_line_text_field` Shopify-native attrs (bag-case-features etc.); `motherboard-form-factor` dual-write via `fan_out`; category-applicability gating; `TL_Sync_Shopify_Attribute_Vocab` n8n wrapper; `tl_shopify_metafield_definitions_mirror` population.
