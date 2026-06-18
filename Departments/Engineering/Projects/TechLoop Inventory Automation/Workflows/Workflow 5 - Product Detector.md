@@ -3,7 +3,7 @@
 **Status:** Deployed
 **n8n Name:** `TL_Product_Detector`
 **n8n ID:** `rnUjGGsdD1jdaFIg`
-**Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/rnUjGGsdD1jdaFIg)
+**Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/rnUjGGsdD1jdaFIg)
 **Schedule:** Every 2 hours at :45 (after Leader Ingest at :00)
 **Cron:** `45 */2 * * *`
 

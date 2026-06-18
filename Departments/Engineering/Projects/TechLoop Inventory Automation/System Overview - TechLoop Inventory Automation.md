@@ -23,7 +23,7 @@ The system is **decoupled** into three distinct layers:
     -   **Host:** `192.168.1.111`
     -   **URL:** `https://supabase.reganmcgregor.com.au`
 -   **Automation:** n8n.
-    -   **URL:** `https://n8n.reganmcgregor.com.au`
+    -   **URL:** `https://workflows.labgregor.dev`
 -   **Supplier:** Leader Computers (XML Feed).
 -   **Store:** WooCommerce.
 
@@ -34,35 +34,35 @@ The system is **decoupled** into three distinct layers:
 ### Workflow 1: Leader Ingest
 -   **n8n Name:** `TL_Ingest_Leader_Feed`
 -   **n8n ID:** `mUkhS0BfN7Lq6EsS`
--   **Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/mUkhS0BfN7Lq6EsS)
+-   **Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/mUkhS0BfN7Lq6EsS)
 -   **Frequency:** Every 2 hours at :00.
 -   **Function:** Fetches the massive Leader XML feed, transforms tags to `snake_case`, sanitizes stock levels (handling "CALL"/"POA"), and performs a high-performance batch upsert into `tl_feed_leader_raw`.
 
 ### Workflow 2: WooCommerce Mirroring
 -   **n8n Name:** `TL_Mirror_WooCommerce`
 -   **n8n ID:** `hEUnN85kXJZEG3qZ`
--   **Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/hEUnN85kXJZEG3qZ)
+-   **Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/hEUnN85kXJZEG3qZ)
 -   **Frequency:** Every 4 hours at :15.
 -   **Function:** Performs an incremental sync of WooCommerce products into `tl_wc_products_mirror` using the `modified_after` filter. It extracts custom ACF fields (Supplier ID, DBP, MPN) from the metadata array into flat columns for fast querying.
 
 ### Workflow 3: Inventory Syncer (The Diff Engine)
 -   **n8n Name:** `TL_Inventory_Syncer`
 -   **n8n ID:** `ZgqlMhNqh3TJMB6G`
--   **Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/ZgqlMhNqh3TJMB6G)
+-   **Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/ZgqlMhNqh3TJMB6G)
 -   **Frequency:** Every 3 hours at :30.
 -   **Function:** The core logic. Runs a complex SQL JOIN between the Leader feed and the WC Mirror. It identifies stock changes, cost (DBP) changes, and discontinued products (missing from feed for >2 hours). It pushes updates to WooCommerce and logs every change to `tl_sync_log`.
 
 ### Workflow 4: Price Watchdog
 -   **n8n Name:** `TL_Price_Watchdog`
 -   **n8n ID:** `yExNIbiIGVFOoJ4N`
--   **Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/yExNIbiIGVFOoJ4N)
+-   **Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/yExNIbiIGVFOoJ4N)
 -   **Frequency:** Daily at 6:00 AM.
 -   **Function:** Scans for low-margin products or items selling below cost. It generates an HTML email report with Price, RRP, and Cost comparisons, providing an early warning system for pricing errors.
 
 ### Workflow 5: Product Detector
 -   **n8n Name:** `TL_Product_Detector`
 -   **n8n ID:** `rnUjGGsdD1jdaFIg`
--   **Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/rnUjGGsdD1jdaFIg)
+-   **Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/rnUjGGsdD1jdaFIg)
 -   **Frequency:** Every 2 hours at :45.
 -   **Function:** Detects new products in the Leader feed that don't exist in WooCommerce. Queues them in `tl_onboarding_queue` for human review with category mapping. Auto-approves products in trusted categories. Sends Slack notifications to `#product-detector` with interactive HITL messages including Approve, Reject, and Google Search buttons for mobile-friendly product research.
 -   **Documentation:** [[Workflows/Workflow 5 - Product Detector|Workflow 5 - Product Detector]]
@@ -70,7 +70,7 @@ The system is **decoupled** into three distinct layers:
 ### Workflow 6: Product Publisher
 -   **n8n Name:** `TL_Product_Publisher`
 -   **n8n ID:** `xBSqJjECViFMgUNI`
--   **Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/xBSqJjECViFMgUNI)
+-   **Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/xBSqJjECViFMgUNI)
 -   **Frequency:** Every 5 minutes.
 -   **Function:** Takes approved products from the queue and creates them in WooCommerce. Uses Ollama (`qwen2.5:14b`) for AI title optimisation (with Qdrant RAG examples), description cleanup (with `<h3>` headings), and short description generation (with Qdrant RAG examples). Processes product images (square with white padding) and uploads to WC Media Library. Products are created as drafts for final review. Creates a `tl_product_optimizations` record for each published product to track enrichment status.
 -   **Documentation:** [[Workflows/Workflow 6 - Product Publisher|Workflow 6 - Product Publisher]]
@@ -78,7 +78,7 @@ The system is **decoupled** into three distinct layers:
 ### Workflow 7: Slack Interaction Handler (HITL Gateway)
 -   **n8n Name:** `TL_Slack_Interaction_Handler`
 -   **n8n ID:** `rDloLTYACT56kfpn`
--   **Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/rDloLTYACT56kfpn)
+-   **Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/rDloLTYACT56kfpn)
 -   **Trigger:** Webhook (`/webhook/slack-interaction`)
 -   **Function:** Handles all Slack interactive callbacks (buttons and dropdowns) for HITL approval flows. Routes by `action_id` to 10 branches: approve/reject products, publish WC drafts, approve/reject/map-to-existing attributes, approve/reject terms, approve/reject mappings. Supports both `button` actions (`action.value`) and `static_select` dropdowns (`action.selected_option.value`). Updates the Slack message with confirmation after each action.
 -   **Documentation:** See Section 5 (Operations & Monitoring) below for HITL channel and action mapping.
@@ -86,7 +86,7 @@ The system is **decoupled** into three distinct layers:
 ### Workflow 8: Queue Reviewer
 -   **n8n Name:** `TL_Queue_Reviewer`
 -   **n8n ID:** `I0eOOo8geZfhLKfs`
--   **Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/I0eOOo8geZfhLKfs)
+-   **Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/I0eOOo8geZfhLKfs)
 -   **Frequency:** Every 4 hours + Slack Slash Command (`/review-queue`).
 -   **Function:** Periodically (or on-demand via `/review-queue` slash command) pulls a random set of 5 products from the `pending_review` queue and sends them to Slack for human review. Each product message includes Approve, Reject, and Google Search buttons for efficient mobile review workflow. Helps process the backlog of thousands of products in manageable chunks.
 -   **Documentation:** [[Workflows/Workflow 8 - Queue Reviewer|Workflow 8 - Queue Reviewer]]
@@ -94,21 +94,21 @@ The system is **decoupled** into three distinct layers:
 ### Utility: Seed Qdrant Titles
 -   **n8n Name:** `TL_Seed_Qdrant_Titles`
 -   **n8n ID:** `WSZvDoxgUBmOuM8W`
--   **Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/WSZvDoxgUBmOuM8W)
+-   **Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/WSZvDoxgUBmOuM8W)
 -   **Frequency:** Manual (one-time).
 -   **Function:** Populates the Qdrant `product_titles` collection with existing good product titles from `tl_wc_products_mirror` for use as RAG examples by the Product Publisher.
 
 ### Utility: Seed Qdrant Short Descriptions
 -   **n8n Name:** `TL_Seed_Qdrant_Short_Descriptions`
 -   **n8n ID:** `2M95azR2qs49Tku4`
--   **Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/2M95azR2qs49Tku4)
+-   **Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/2M95azR2qs49Tku4)
 -   **Frequency:** Manual (one-time).
 -   **Function:** Populates the Qdrant `product_short_descriptions` collection with existing short descriptions from `tl_wc_products_mirror` for use as RAG examples by the Product Publisher.
 
 ### Utility: Import WC Brands
 -   **n8n Name:** `TL_Import_WC_Brands (Utility)`
 -   **n8n ID:** `I1xF1z82hG423xP2`
--   **Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/I1xF1z82hG423xP2)
+-   **Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/I1xF1z82hG423xP2)
 -   **Frequency:** Webhook-triggered.
 -   **Function:** Imports WooCommerce brand taxonomy terms into `tl_brand_map` for brand lookup during publishing.
 

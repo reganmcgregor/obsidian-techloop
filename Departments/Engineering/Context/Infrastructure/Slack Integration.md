@@ -9,7 +9,7 @@ All TechLoop automation workflows send notifications to Slack instead of email. 
 - **App Name:** TechLoop Automations
 - **n8n Credential:** `TechLoop Automation` (ID: `DvtYgxYgI1p5Q3QX`, type: `slackApi` bot token)
 - **Required Scopes:** `chat:write`, `chat:write.public`
-- **Interactivity Request URL:** `https://n8n.reganmcgregor.com.au/webhook/slack-interaction`
+- **Interactivity Request URL:** `https://workflows.labgregor.dev/webhook/slack-interaction`
 
 ## Channels
 

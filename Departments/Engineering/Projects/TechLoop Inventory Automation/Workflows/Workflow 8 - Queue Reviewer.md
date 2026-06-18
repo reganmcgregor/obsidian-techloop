@@ -3,7 +3,7 @@
 **Status:** Deployed
 **n8n Name:** `TL_Queue_Reviewer`
 **n8n ID:** `I0eOOo8geZfhLKfs`
-**Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/I0eOOo8geZfhLKfs)
+**Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/I0eOOo8geZfhLKfs)
 **Schedule:** Every 4 hours
 **Slash Command:** `/review-queue` (Path: `/webhook/slack/review-queue`)
 
@@ -47,7 +47,7 @@ The Review Sampler periodically (or on-demand) pulls a random set of 5 products 
 2. Navigate to: Features → Slash Commands
 3. Create New Command:
    - **Command:** `/review-queue`
-   - **Request URL:** `https://n8n.reganmcgregor.com.au/webhook/slack/review-queue`
+   - **Request URL:** `https://workflows.labgregor.dev/webhook/slack/review-queue`
    - **Short Description:** "Get 5 products from the review queue"
    - **Method:** `POST`
 4. Reinstall your app if prompted

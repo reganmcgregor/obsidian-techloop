@@ -80,7 +80,7 @@ sudo tailscale down
 
 ### n8n (Workflow Automation)
 - **Location:** `~/n8n/docker-compose.yml`
-- **Access:** https://n8n.reganmcgregor.com.au
+- **Access:** https://workflows.labgregor.dev
 - **Local Port:** 5678
 - **Version:** 2.22.5 (`n8nio/n8n:latest`)
 - **Database:** PostgreSQL (n8n_postgres_db) — `postgres:16-alpine`, Port 5432
@@ -198,7 +198,7 @@ sudo tailscale down
 
 All services are routed through Nginx Proxy Manager with Cloudflare tunnels:
 - `supabase.reganmcgregor.com.au` → Supabase (Kong port 8001)
-- `n8n.reganmcgregor.com.au` → n8n (port 5678)
+- `workflows.labgregor.dev` → n8n (port 5678)
 
 ## Notes
 

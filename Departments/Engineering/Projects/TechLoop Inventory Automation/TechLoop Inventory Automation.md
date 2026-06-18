@@ -129,7 +129,7 @@ See [[Future Roadmap - TechLoop Inventory Automation]] for detail.
 ## Quick Links
 
 - [Supabase Dashboard](https://supabase.reganmcgregor.com.au)
-- [n8n Workflows](https://n8n.reganmcgregor.com.au)
+- [n8n Workflows](https://workflows.labgregor.dev)
 - [[System Overview - TechLoop Inventory Automation|System Architecture & Workflow Catalog]]
 - [[Phase 6.3 - Product Enrichment Pipeline|Phase 6.3 Full Specification]]
 - [[Future Roadmap - TechLoop Inventory Automation|Roadmap & Maintenance Tasks]]

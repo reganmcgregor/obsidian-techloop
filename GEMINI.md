@@ -56,7 +56,7 @@ The primary active engineering project is the **Inventory Automation** system.
 ### Infrastructure Context
 *   **Server:** Ubuntu 25.04 @ `192.168.1.111`
 *   **Supabase:** `https://supabase.reganmcgregor.com.au`
-*   **n8n:** `https://n8n.reganmcgregor.com.au`
+*   **n8n:** `https://workflows.labgregor.dev`
 
 ### Engineering Focus
 *   `Departments/Engineering/Projects/` contains *technical specifications* and *logic* for engineering tasks. The execution steps are tracked in Notion (Engineering teamspace). Use these notes to understand *how* to build the solution.

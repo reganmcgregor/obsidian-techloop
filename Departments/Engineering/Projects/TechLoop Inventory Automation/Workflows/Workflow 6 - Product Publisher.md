@@ -3,7 +3,7 @@
 **Status:** Production
 **n8n Name:** `TL_Product_Publisher`
 **n8n ID:** `xBSqJjECViFMgUNI`
-**Direct Link:** [Open in n8n](https://n8n.reganmcgregor.com.au/workflow/xBSqJjECViFMgUNI)
+**Direct Link:** [Open in n8n](https://workflows.labgregor.dev/workflow/xBSqJjECViFMgUNI)
 **Schedule:** Every 5 minutes
 **Cron:** `*/5 * * * *`
 **Last Updated:** 2026-02-07
