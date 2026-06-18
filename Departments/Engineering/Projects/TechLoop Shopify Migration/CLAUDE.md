@@ -11,7 +11,7 @@ Migrating techloop.com.au from self-hosted WooCommerce to **Shopify Basic**. DNS
 - **Phase 10 (Onboarding) — ✅ Done (2026-05-31):** Detector (`fz50fq1dCmrHhazX`, active) + Publisher (`pgWWBz9f6RXLXEIe`, built+verified, **inactive** pending user go-live) + Slack Handler (`hikIeVV081e76pEv`, active). Category map fully resolved (426 approved / 0 pending); onboarding view yields 771 products. Only remaining = flip Publisher active. See [[Phase 10 — Workflow Rebuild Tier 2 (Onboarding)]].
 - **Phase 11 (Enrichment) — ✅ Done (2026-06-18):** 11.A bulk backfill (992 products) + 11.B chain fully reactivated. Supabase-backed attr mapping (335 attrs = 170 WC-backed + 165 Shopify-native; `tl_attribute_mapping` + `tl_shopify_metaobject_values`); `auto_approved` safety gate (never auto-pushes to live store); Pusher handles WC-backed + Shopify-native attrs with correct namespace; 5 enrichment workflows live; review queue cleared (200 approved, 14 rejected).
 - **Phase 12 (Alerts/Utilities) — ✅ Done (2026-06-18):** TL_Price_Watchdog (`yExNIbiIGVFOoJ4N`) rebuilt for Shopify + "Set to RRP" Slack button. TL_Queue_Reviewer_Shopify (`20i0wyIaAnu9h2Wh`) already active.
-- Phase 13 WC decom — Not Started.
+- **Phase 13 (WC Decommission) — ✅ Done (2026-06-18):** WP/WooCommerce instance fully decommissioned. Dropped 5 WC mirror tables (backed up to `_archive/phase13-wc-decom/`); renamed `wc_product_id → shopify_product_id` across 3 tables; rewrote 12 views WC-free; deleted 5 n8n workflows (4 frozen WC originals + TL_Attribute_Proposer); edited 5 active workflows to remove remaining WC nodes. End-to-end verified (Enrich exec 57884 + Pusher exec 57890). See [[Phase 13 — WooCommerce Decommission]].
 
 ## Shopify store
 - **Admin API host:** `techloop-7.myshopify.com` (works for token-based Admin GraphQL; API version `2025-07`). Permanent domain is `zc30tg-fi.myshopify.com` — required for **OAuth-callback** flows (we don't use those); fine to prefer it for durability.
@@ -31,11 +31,9 @@ Migrating techloop.com.au from self-hosted WooCommerce to **Shopify Basic**. DNS
 - **TL_URL_Discoverer** `QQMwVzR5c79Nx3RL` — ✅ reactivated 2026-06-18, LIMIT 50 candidates.
 - **TL_Scraper** `b4rR1gwQ25uUJkEQ` — ✅ reactivated 2026-06-18 (Crawl4AI at `http://crawl4ai:11235/crawl`).
 - **TL_Enrich_Attributes** `lq8960K0xVwF3Xst` — ✅ reactivated 2026-06-18 (`*/15 * * * *`). Shopify-vocab-aware; writes `auto_approved` (not `approved`) for high-confidence promoted attrs.
-- **TL_Attribute_Proposer** `hUGA1KFWBTGU8K6T` — ✅ reactivated 2026-06-18.
 - **TL_Enrichment_Reviewer** `OarmHP6DpJvAV0Pb` — ✅ reactivated 2026-06-18. Fetches `pending` + `auto_approved`; shows 🤖 Auto / ⏳ Pending label.
 - **TL_Attribute_Pusher_Shopify** `s06MMF8cRDi0DXhj` — webhook-triggered. Reads mapping from `tl_attribute_mapping` + `tl_shopify_metaobject_values`; handles WC-backed attrs (`wc_attribute_id IS NOT NULL`) and Shopify-native attrs (`shopify_key IS NOT NULL`).
-- **TL_Slack_Interaction_Handler_Shopify** `hikIeVV081e76pEv` — `approve_attr_mapping` fires Pusher; fixed double-encoding + stray connection key.
-- FROZEN WC originals (delete in Phase 13): TL_Mirror_WooCommerce `hEUnN85kXJZEG3qZ`, TL_Inventory_Syncer `ZgqlMhNqh3TJMB6G`, TL_Product_Detector `rnUjGGsdD1jdaFIg`, Slack handler `rDloLTYACT56kfpn`.
+- **TL_Slack_Interaction_Handler_Shopify** `hikIeVV081e76pEv` — `approve_attr_mapping` fires Pusher; WC API nodes removed (Phase 13).
 
 ## Supabase mirror tables
 `tl_shopify_products_mirror` (+ `supplier_*` cols), `tl_shopify_variants_mirror` (+ `unit_cost`), `tl_shopify_inventory_levels_mirror` (FK `location_id → tl_shopify_locations_mirror.shopify_id`, FK `variant_id → variants.shopify_id`), `tl_shopify_locations_mirror` (seeded), `tl_feed_leader_raw`, `tl_product_supplier_status` (re-keyed on `(supplier_product_id, supplier_name)`), `tl_onboarding_queue`, `tl_workflow_executions`. View `vw_new_products_for_shopify_onboarding` (Phase-10 prep; excludes both mirrors).

@@ -239,7 +239,7 @@ The `TL_Product_Publisher_Shopify` AI title/description node hallucinated a mode
 
 ## Open questions / follow-ups
 
-- WC decommission (Phase 13) deferred until all Phase 11.B upstream workflows are verified live against Shopify
+- WC decommission — **Done in [[Phase 13 — WooCommerce Decommission]] (2026-06-18)**. All Phase 11.B workflows verified live against Shopify; WC instance and artefacts fully removed.
 - Phase 11.C scope TBD after audit Sheet
 
 ---
