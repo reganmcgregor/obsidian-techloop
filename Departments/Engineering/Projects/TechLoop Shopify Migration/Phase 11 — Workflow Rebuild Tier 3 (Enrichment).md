@@ -118,7 +118,7 @@ Third tier of the n8n rebuild: push existing Supabase-stored, HITL-reviewed attr
 - `single_line_text_field` — 170 of 172 attrs (default for both shopify.* and custom.*)
 - `list.single_line_text_field` — `pa_features` → `shopify.features`, `pa_lighting` → `shopify.lighting-features`, `pa_motherboard-form-factor` → `custom.compatible-motherboard-form-factors` (dual-write list)
 
-**Architecture (as built):** All Supabase access uses direct Postgres connection (credential `Supabase Postgres`, `BSoGuZ9BOv4OWqXf`) — the n8n Docker container cannot reach `supabase.reganmcgregor.com.au` via HTTP. Two Postgres nodes:
+**Architecture (as built):** All Supabase access uses direct Postgres connection (credential `Supabase Postgres`, `BSoGuZ9BOv4OWqXf`) — the n8n Docker container cannot reach `supabase.labgregor.dev` via HTTP. Two Postgres nodes:
 1. `Get Product` — LEFT JOIN `tl_wc_products_mirror` + `tl_shopify_products_mirror`, always returns 1 row; `shopify_gid` is null if not yet migrated.
 2. `Get Enrichment Attrs` — queries `tl_product_attributes` with `alwaysOutputData: true` to avoid 0-item propagation stopping the Code node.
 

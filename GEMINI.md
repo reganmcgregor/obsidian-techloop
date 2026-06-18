@@ -55,7 +55,7 @@ The primary active engineering project is the **Inventory Automation** system.
 
 ### Infrastructure Context
 *   **Server:** Ubuntu 25.04 @ `192.168.1.111`
-*   **Supabase:** `https://supabase.reganmcgregor.com.au`
+*   **Supabase:** `https://supabase.labgregor.dev`
 *   **n8n:** `https://workflows.labgregor.dev`
 
 ### Engineering Focus

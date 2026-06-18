@@ -249,7 +249,7 @@ All 10 verification tests passed successfully:
 - **JavaScript Utilities:** `/3-Resources/Infrastructure/n8n-utilities.js`
 - **Project Plan:** `~/.claude/plans/robust-forging-blossom.md`
 - **Linear Project:** [TechLoop Inventory Automation](https://linear.app/techloophq/project/techloop-inventory-automation-leader-integration-92cc3fc5a76f)
-- **Supabase:** https://supabase.reganmcgregor.com.au/mcp
+- **Supabase:** https://supabase.labgregor.dev/mcp
 
 ---
 

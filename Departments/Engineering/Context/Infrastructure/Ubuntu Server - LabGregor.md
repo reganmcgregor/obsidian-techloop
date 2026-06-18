@@ -1,10 +1,10 @@
-# Ubuntu Server - regan-server
+# Ubuntu Server - labgregor
 
 ## Server Access
 
-**SSH Command:** `ssh regan-server`
+**SSH Command:** `ssh labgregor`
 - No username required (uses default SSH key)
-- Hostname: `regan-server`
+- Hostname: `labgregor`
 - User: `reganmcgregor`
 - LAN IP: `192.168.1.111`
 - Tailscale IP: `100.91.31.94` (reachable from anywhere on the tailnet — see below)
@@ -12,17 +12,17 @@
 ## Tailscale (VPN / Remote Access)
 
 - **Version:** 1.98.3
-- **Machine name:** `regan-server`
+- **Machine name:** `labgregor`
 - **Tailscale IPv4:** `100.91.31.94`
 - **Tailscale IPv6:** `fd7a:115c:a1e0::8c3a:1f5e`
-- **MagicDNS name:** `regan-server.tail86e920.ts.net`
+- **MagicDNS name:** `labgregor.tail86e920.ts.net`
 - **Tailnet:** `tail86e920.ts.net`
 - **Use Case:** Secure remote access to the server and its services without exposing ports publicly — reach the box over the tailnet from any enrolled device.
 - **Other devices on tailnet:**
   - `iphone171` — `100.123.121.50` (iOS)
   - `regans-macbook-pro` — `100.93.253.91` (macOS)
 - **Access examples:**
-  - `ssh reganmcgregor@100.91.31.94` or `ssh reganmcgregor@regan-server.tail86e920.ts.net`
+  - `ssh reganmcgregor@100.91.31.94` or `ssh reganmcgregor@labgregor.tail86e920.ts.net`
   - Services are reachable on their host ports over Tailscale, e.g. `http://100.91.31.94:3000` (Homepage), `http://100.91.31.94:8080` (Open WebUI)
 
 ### Useful commands
@@ -54,7 +54,7 @@ sudo tailscale down
 
 ### Supabase (Self-Hosted)
 - **Location:** `~/supabase/docker/`
-- **Access:** https://supabase.reganmcgregor.com.au
+- **Access:** https://supabase.labgregor.dev
 - **Local API:** http://192.168.1.111:8001
 - **Kong Port:** 8001 (HTTP), 8444 (HTTPS)
 - **Database Port:** 5433 (Supavisor pooler), 6544 (pooler transaction mode)
@@ -73,7 +73,7 @@ sudo tailscale down
   - imgproxy (supabase-imgproxy) — `imgproxy:v3.30.1`
   - Vector log shipper (supabase-vector) — `timberio/vector:0.53.0`
   - Cloudflare tunnel (supabase-cloudflared)
-- **MCP Access:** Configured in `.mcp.json` at `https://supabase.reganmcgregor.com.au/mcp`
+- **MCP Access:** Configured in `.mcp.json` at `https://supabase.labgregor.dev/mcp`
 - **Environment:** `~/supabase/.env`
 - **Kong Config:** `~/supabase/docker/volumes/api/kong.yml`
 - **Database Scripts:** `~/supabase/docker/volumes/db/`
@@ -197,7 +197,7 @@ sudo tailscale down
 ## Domain Routing
 
 All services are routed through Nginx Proxy Manager with Cloudflare tunnels:
-- `supabase.reganmcgregor.com.au` → Supabase (Kong port 8001)
+- `supabase.labgregor.dev` → Supabase (Kong port 8001)
 - `workflows.labgregor.dev` → n8n (port 5678)
 
 ## Notes
@@ -212,7 +212,7 @@ All services are routed through Nginx Proxy Manager with Cloudflare tunnels:
 
 ```bash
 # SSH into server
-ssh regan-server
+ssh labgregor
 
 # View all running containers
 docker ps

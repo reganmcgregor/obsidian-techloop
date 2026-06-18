@@ -21,7 +21,7 @@ The system is **decoupled** into three distinct layers:
 
 -   **Database:** Supabase PostgreSQL (Standard self-hosted via Docker).
     -   **Host:** `192.168.1.111`
-    -   **URL:** `https://supabase.reganmcgregor.com.au`
+    -   **URL:** `https://supabase.labgregor.dev`
 -   **Automation:** n8n.
     -   **URL:** `https://workflows.labgregor.dev`
 -   **Supplier:** Leader Computers (XML Feed).

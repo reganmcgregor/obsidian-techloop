@@ -358,7 +358,7 @@ The unique constraint on `tl_product_attributes` was changed to allow multiple v
 - [[Slack Integration]]
 - [[Tone of Voice]]
 - [[AI Writing Guidelines]]
-- [[Ubuntu Server - regan-server]]
+- [[Ubuntu Server - LabGregor]]
 
 ---
 
