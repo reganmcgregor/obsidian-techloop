@@ -139,7 +139,7 @@ These items were identified during Phase 13 and deferred for later resolution. T
 
 3. **Pre-existing metafield type drift** — One row in `tl_attribute_mapping` has type `list` vs the expected scalar type, causing an `INVALID_TYPE` error on one attribute push. Requires a targeted fix to the mapping row.
 
-4. **`TL_Product_Publisher_Shopify` schedule vs docs mismatch** — The workflow is `active: true` on a 5-minute schedule, which contradicts documentation stating it should be inactive pending user go-live decision. Confirm intended state and update docs or workflow accordingly.
+4. **`TL_Product_Publisher_Shopify` is intentionally live** — `active: true` on a 5-minute schedule (go-live happened 2026-06-06, per the migration status table). A stale `CLAUDE.md` note saying "inactive pending go-live" was the error; corrected 2026-06-18. The workflow is correct as-is — do not deactivate. ✅ Resolved.
 
 ---
 
