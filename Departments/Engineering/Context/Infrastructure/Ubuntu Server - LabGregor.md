@@ -1,5 +1,3 @@
-# Ubuntu Server - labgregor
-
 ## Server Access
 
 **SSH Command:** `ssh labgregor`

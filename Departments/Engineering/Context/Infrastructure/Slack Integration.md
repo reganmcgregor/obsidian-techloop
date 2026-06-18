@@ -1,5 +1,3 @@
-# Slack Integration
-
 ## Overview
 
 All TechLoop automation workflows send notifications to Slack instead of email. A dedicated **TL_Slack_Interaction_Handler** workflow processes button callbacks for Human-in-the-Loop (HITL) approval flows.
