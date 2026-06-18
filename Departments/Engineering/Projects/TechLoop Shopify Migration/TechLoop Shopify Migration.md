@@ -26,6 +26,7 @@ Migration of techloop.com.au from WooCommerce (self-hosted) to Shopify Basic.
 - [[Phase 9 — Workflow Rebuild Tier 1 (Inventory)]] — ✅ Done — TL_Mirror_Shopify + TL_Inventory_Syncer_Shopify both live
 - [[Phase 10 — Workflow Rebuild Tier 2 (Onboarding)]] — ✅ Done — Detector + Publisher + Slack Handler all active; onboarding pipeline live (Publisher activated 2026-06-06)
 - [[Phase 11 — Workflow Rebuild Tier 3 (Enrichment)]] — In Progress — Attribute mapping audit → bulk backfill → enrichment chain rebuild
+- [[Phase 12 — Workflow Rebuild Tier 4 (Alerts & Utilities)]] — ✅ Done (2026-06-18) — Price Watchdog rebuilt for Shopify + "Set to RRP" button; one-off bulk RRP correction (333 products)
 - [[Attribute Strategy (deferred)]] — captured brainstorm decisions for Phase 11 rebuild (post-launch); not yet specced
 - [[Shopify Linked Products Research]] — Pattern 3 (Metaobject Product Group) — deferred to Phase 5b
 - [[Shopify Migration Considerations]] — Pre-decision impact assessment (historical reference only)
