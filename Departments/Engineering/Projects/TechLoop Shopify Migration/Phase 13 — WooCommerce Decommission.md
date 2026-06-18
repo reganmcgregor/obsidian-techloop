@@ -103,6 +103,30 @@ End-to-end test after decommission:
 
 No WC-related errors observed in either execution.
 
+### Final verification — 2026-06-18
+
+A full read-only sweep of all 13 active n8n workflows and the live Supabase schema was completed on 2026-06-18. Result: **zero functional WC references** found.
+
+- No `wp-json/wc/` HTTP calls in any workflow
+- No `wooCommerceApi` credential in use
+- No `tl_wc_*` table or view queries in any active workflow
+- All 5 target workflows confirmed deleted; all other frozen WC workflows confirmed inactive
+- Zero `tl_wc_*` tables or views in Supabase
+- No `pushed_to_wc` rows remaining in any table
+
+Phase 13 is fully closed.
+
+### Cosmetic WC-named leftovers (deferred to enrichment project)
+
+The items below carry WC-derived names but have **no runtime WC dependency** — they are mapping keys, a Slack action ID, JS variable names, or dormant unused columns. They do not affect the live stack and are deferred to the [[Enrichment Redesign & Metafield Reconciliation]] project.
+
+- `tl_attribute_mapping.wc_attribute_id` and `wc_slug` — mapping-key columns (no FK, no WC API call)
+- `tl_product_attributes.wc_attribute_id` — retained mapping reference
+- `tl_proposed_attributes.wc_attribute_id` — retained mapping reference
+- Slack `action_id: wc_publish_product` — routes to Shopify; rename is cosmetic only
+- JS variable names in active workflow code (no external WC calls)
+- Dormant unused columns: `tl_category_map.wc_category_id`/`wc_category_name`, `tl_product_supplier_status.wc_id`, `tl_sync_log.wc_id`
+
 ---
 
 ## Known follow-ups
