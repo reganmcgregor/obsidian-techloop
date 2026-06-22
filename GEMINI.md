@@ -22,6 +22,11 @@ This file provides context and instructions for Gemini when working within the *
 *   `_archive/`: Inactive/completed items (replaces `4-Archives/`).
 *   `_templates/`: Templates for standard notes (Product, Project).
 
+**Notable migrations from PARA:**
+*   Engineering project folders (`TechLoop Inventory Automation`, `TechLoop Shopify Migration`, `TechLoop Store Migration - Ecomus Theme`) → `Departments/Engineering/Projects/`
+*   `3-Resources/Infrastructure/` → `Departments/Engineering/Context/Infrastructure/`
+*   Tone of Voice + AI Writing Guidelines → `Departments/Marketing/Context/`
+
 ---
 
 ## 2. Active Focus: Inventory Automation
@@ -83,6 +88,10 @@ When creating Notion tasks, default the **Assignee** to:
 *   `<memory>/notion_user.md` — user UUID
 *   `<memory>/notion_teamspaces.md` — all 6 teamspace UUIDs
 *   `<memory>/notion_databases.md` — all DB IDs across teamspaces
+*   `<memory>/linear_migration.md` — TEC-N → Notion page ID map for the 15 Linear-imported tasks (Phase 3, May 2026)
+
+### Project Specs Live in DB Row Bodies
+Engineering project specs (Inventory Automation, Shopify Migration, Ecomus) live as the **body of the corresponding row** in the Projects (Engineering) DB — NOT as standalone pages. Updating a spec means editing the DB row's page body. The Obsidian markdown file's `notion_page_id` points at the DB row, not a standalone page.
 
 ### Notion Sync — `/publish` Skill
 Notes synced to Notion carry YAML front matter. Key fields:
@@ -139,4 +148,11 @@ Each department has `Departments/<dept>/Playbooks/` in Obsidian, mirrored to a `
 *   Engineering playbooks — `canonical: obsidian` (pushed to Notion)
 *   All other dept playbooks — `canonical: notion` (pulled into Obsidian for agent reads)
 
-19 stub playbook pages exist across all 6 departments (skeletons — content TBD).
+19 playbook pages exist across all 6 departments. Phase 3 populated 6 of them with first-pass content:
+*   Engineering: Deploy Checklist, n8n Workflow Update Process, Schema Deployment, Incident Response
+*   General: Weekly Review, Monthly Retro
+
+The remaining 13 playbook stubs live in Marketing / Purchasing / Customer-Service / Operations — fill ad-hoc when you actually run those workflows.
+
+### Outstanding manual UI cleanup
+See `Departments/General/Playbooks/Notion Cleanup.md` (also published to Notion as the **📋 Notion Cleanup** playbook in General Playbooks). Items remaining are UI-only and confirmed unreachable via API: status option renames, default Assignee templates, linked-DB views in dept hubs, optional Bin cleanup.
