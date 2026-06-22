@@ -30,7 +30,7 @@ Built to scale toward ~10,000 products across many categories (many empty today,
 ## Locked decisions
 
 - **Taxonomy-first, AI-proposed schema.** Per Shopify category, start from Standard Product Taxonomy attributes; mint `custom.*` only for genuine gaps. An LLM proposes the per-category schema; a human approves in Slack.
-- **Model: single `gemma4:12b` (QAT) generalist** on the local Ollama (labgregor, RTX 3060 12 GB), thinking-off for extraction/tool-calling. Replaces `qwen2.5:14b`; multimodal so the (optional, deferred) image pass uses the same model. ✅ **Gate passed 2026-06-22** — see status.
+- **Model: single `gemma4:12b-it-qat` generalist** (QAT int4, ~7.2 GB) on the local Ollama (labgregor, RTX 3060 12 GB), thinking-off for extraction/tool-calling. Replaces `qwen2.5:14b`; multimodal so the (optional, deferred) image pass uses the same model. Opus is plan/orchestrator only; the local model does the per-product work. ✅ **Gate passed 2026-06-22** — see status.
 - **Full Slack human review** before any metafield is pushed.
 - **Scrape is not a prerequisite** for attributes (extract from title + feed + description; scrape re-triggers enrichment + feeds P2/P3).
 - **Push is isolation-safe** (adaptive batched/per-metafield `metafieldsSet`) and **category-aware** (assign Shopify taxonomy category first; constrained-key mismatch routes to `custom.*`).
@@ -55,7 +55,7 @@ Reuses the existing feed/scrape spine (`TL_Ingest_Leader_Feed`, `TL_URL_Discover
 ## Status — 2026-06-22
 
 - ✅ Plan approved; project spun out of the migration.
-- ✅ **Step 0 model gate passed.** `gemma4:12b` pulled on labgregor; validated head-to-head with `qwen2.5:14b` (identical correct extraction, clean non-thinking JSON) AND through the live n8n **AI Agent + Calculator tool + Structured Output Parser** path (`{result:42, used_calculator:true}`). Single-model Gemma adopted; fallback pair (qwen3:8b + gemma4:e4b) not needed. Reusable Ollama LangChain credential created: `bFORc9N56kqykD0i` ("Ollama (labgregor)").
+- ✅ **Step 0 model gate passed.** Adopted **`gemma4:12b-it-qat`** (QAT, 7.2 GB) on labgregor; identical correct extraction vs `qwen2.5:14b` (clean non-thinking JSON) AND validated through the live n8n **AI Agent + Calculator tool + Structured Output Parser** path (`{result:42, used_calculator:true}`). Single-model adopted; fallback pair (qwen3:8b + gemma4:e4b) not needed. Reusable Ollama LangChain credential: `bFORc9N56kqykD0i` ("Ollama (labgregor)").
 - ⏳ **Blocked:** DDL migration + W1/W0 build/testing await the Supabase MCP connection (was intermittently unreachable from the build host on 2026-06-22). Taxonomy leaf check folds into W1/W2 when DB access is back.
 - ⏭️ Next: stand up the Notion Projects-DB row (Engineering teamspace `3558c3d3-c03e-81f4-808c-00427b3b52e1`); apply additive Supabase DDL; build W1 then W0.
 
