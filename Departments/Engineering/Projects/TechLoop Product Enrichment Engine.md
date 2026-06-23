@@ -29,7 +29,7 @@ Built to scale toward ~10,000 products across many categories (many empty today,
 
 ## Locked decisions
 
-- **Taxonomy-first, AI-proposed schema.** Per Shopify category, start from Standard Product Taxonomy attributes; mint `custom.*` only for genuine gaps. An LLM proposes the per-category schema; a human approves in Slack.
+- **Taxonomy-first, DETERMINISTIC schema (revised 2026-06-24).** Per Shopify category, the attribute set is *derived* from the Standard Product Taxonomy (live `taxonomy` query) joined to `standardMetafieldDefinitionTemplates` (which carry the canonical type) — **no LLM proposes attributes, no per-category approval**; all standard attrs are auto-approved by being standard. `custom.*` gaps come from a curated shared registry (`tl_custom_attribute_registry`) with correct measurement types (e.g. capacity→`data_storage_capacity`, speed→`frequency`). The LLM's only job is filling **values**, after Icecat. Runs store-wide (118 categories) on a schedule to stay current.
 - **Model: single `gemma4:12b-it-qat` generalist** (QAT int4, ~7.2 GB) on the local Ollama (labgregor, RTX 3060 12 GB), thinking-off for extraction/tool-calling. Replaces `qwen2.5:14b`; multimodal so the (optional, deferred) image pass uses the same model. Opus is plan/orchestrator only; the local model does the per-product work. ✅ **Gate passed 2026-06-22** — see status.
 - **Full Slack human review** before any metafield is pushed.
 - **Scrape is not a prerequisite** for attributes (extract from title + feed + description; scrape re-triggers enrichment + feeds P2/P3).
@@ -39,7 +39,7 @@ Built to scale toward ~10,000 products across many categories (many empty today,
 
 Continuous overlay on the already-live catalogue:
 
-`W1 sync def-mirror` + `W0 assign category (leaf-checked)` → `W2 propose schema → W3 Slack approve` → `W4 enable defs + seed vocab` → `W5 text-first extract (+W5b optional vision)` → `W6 Slack review → W7 approve→queued` → `W8 isolation-safe push` → `W9 health digest + Search & Discovery facets`.
+`W1 sync def-mirror` + `W0 assign category (leaf-checked)` → `W2 BUILD schema (deterministic, no LLM)` → `W4 enable defs + seed vocab` → value fill: `WX Icecat crosswalk` + `W5a Icecat fill` (deterministic, sponsored brands) then `W5b gemma4 text extract (gaps; +W5c vision)` → `W6 review → W7 approve→queued` → `W8 isolation-safe push` → `W9 health digest + Search & Discovery facets`. (Icecat's cached payload — images + descriptions — also feeds P2/P3.)
 
 Reuses the existing feed/scrape spine (`TL_Ingest_Leader_Feed`, `TL_URL_Discoverer`, `TL_Scraper`). Full design, data-model changes, build steps, pilot plan, and open decisions live in the execution plan:
 
