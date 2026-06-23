@@ -17,7 +17,7 @@ Phase 6 extends the TechLoop Inventory Automation database to support new produc
 
 ### 1. tl_category_map
 
-Maps Leader categories to WooCommerce categories with automation controls.
+Maps Leader categories to target categories with automation controls (gating, auto-approve, margin). Shopify taxonomy + collection mapping lives in `tl_shopify_category_map`. *(2026-06-24: `wc_category_id`/`wc_category_name` renamed to `mapped_category_id`/`mapped_category_name` — see `wc-naming-cleanup-2026-06-24.sql`.)*
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -25,8 +25,8 @@ Maps Leader categories to WooCommerce categories with automation controls.
 | `supplier_code` | VARCHAR(50) | Supplier identifier (default: 'LEADER') |
 | `supplier_category_code` | VARCHAR(100) | Leader category code (e.g., 'HARDWARE > NOTEBOOKS') |
 | `supplier_category_name` | VARCHAR(255) | Human-readable category name |
-| `wc_category_id` | INTEGER | WooCommerce category term_id |
-| `wc_category_name` | VARCHAR(255) | WooCommerce category name (for reference) |
+| `mapped_category_id` | INTEGER | Mapped category id (legacy WooCommerce term_id) |
+| `mapped_category_name` | VARCHAR(255) | Mapped category name (for reference) |
 | `is_blocked` | BOOLEAN | If true, products in this category are auto-rejected |
 | `block_reason` | TEXT | Reason for blocking (e.g., 'Low margin category') |
 | `auto_approve` | BOOLEAN | If true, products skip review and publish automatically |
@@ -34,7 +34,7 @@ Maps Leader categories to WooCommerce categories with automation controls.
 
 **Key Indexes:**
 - `idx_tl_category_map_lookup` - Fast lookup for non-blocked categories
-- `idx_tl_category_map_unmapped` - Find categories without WC mapping
+- `idx_tl_category_map_unmapped` - Find categories without a mapped category
 
 **Usage:**
 - Manually populate this table with category mappings before products can be published
@@ -213,7 +213,7 @@ tl_feed_leader_raw (existing)
         v
 tl_category_map ──────────────────────────────┐
         |                                      |
-        | provides wc_category_id              |
+        | provides mapped_category_id          |
         v                                      |
 vw_new_products_for_onboarding                 |
         |                                      |
@@ -271,8 +271,8 @@ INSERT INTO tl_category_map (
     supplier_code,
     supplier_category_code,
     supplier_category_name,
-    wc_category_id,
-    wc_category_name,
+    mapped_category_id,
+    mapped_category_name,
     auto_approve,
     default_margin_percent
 ) VALUES (
