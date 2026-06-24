@@ -148,7 +148,7 @@ Tracks optimisation status for published products. Central tracking table for al
 
 ## Views
 
-### vw_new_products_for_onboarding
+### tl_vw_new_products_for_onboarding
 
 **Purpose:** Core view for `TL_Product_Detector` - identifies products eligible for onboarding.
 
@@ -164,7 +164,7 @@ Tracks optimisation status for published products. Central tracking table for al
 
 ---
 
-### vw_onboarding_queue_summary
+### tl_vw_onboarding_queue_summary
 
 **Purpose:** Dashboard view showing queue counts by status.
 
@@ -176,7 +176,7 @@ Tracks optimisation status for published products. Central tracking table for al
 
 ---
 
-### vw_onboarding_queue_recent
+### tl_vw_onboarding_queue_recent
 
 **Purpose:** Shows recent queue activity (last 7 days).
 
@@ -184,7 +184,7 @@ Tracks optimisation status for published products. Central tracking table for al
 
 ---
 
-### vw_unmapped_categories
+### tl_vw_unmapped_categories
 
 **Purpose:** Identifies Leader categories without a target-category mapping.
 
@@ -198,7 +198,7 @@ Tracks optimisation status for published products. Central tracking table for al
 
 ---
 
-### vw_products_need_description
+### tl_vw_products_need_description
 
 **Purpose:** Products pending description optimisation (Phase 6.3).
 
@@ -217,7 +217,7 @@ tl_category_map ─────────────────────�
         |                                      |
         | provides mapped_category_id          |
         v                                      |
-vw_new_products_for_onboarding                 |
+tl_vw_new_products_for_onboarding                 |
         |                                      |
         | TL_Product_Detector inserts          |
         v                                      |
@@ -291,13 +291,13 @@ INSERT INTO tl_category_map (
 ### Check Queue Status
 
 ```sql
-SELECT * FROM vw_onboarding_queue_summary;
+SELECT * FROM tl_vw_onboarding_queue_summary;
 ```
 
 ### Find Unmapped Categories
 
 ```sql
-SELECT * FROM vw_unmapped_categories;
+SELECT * FROM tl_vw_unmapped_categories;
 ```
 
 ---
@@ -425,22 +425,22 @@ Per-product attribute extraction results. Maps products to attribute keys (via `
 
 ## Phase 6.3 Views
 
-### vw_products_need_scraping
+### tl_vw_products_need_scraping
 Products with manufacturer URLs ready for scraping (excludes products with 3+ failures).
 
-### vw_products_need_url_discovery
+### tl_vw_products_need_url_discovery
 Products without a manufacturer URL — candidates for URL discovery via SERP.
 
-### vw_products_need_attribute_extraction
+### tl_vw_products_need_attribute_extraction
 Products with `attribute_status = 'pending'`. Aggregates `markdown_content` via `STRING_AGG` across all completed rows in `tl_manufacturer_raw_data` for each product — supports future multi-URL scraping without view changes. Prioritises products with manufacturer data over those relying only on the Leader feed description.
 
-### vw_proposed_attributes
+### tl_vw_proposed_attributes
 Pending HITL proposals — new attributes and new terms grouped by product count.
 
-### vw_pending_attribute_mappings
+### tl_vw_pending_attribute_mappings
 Product-attribute values awaiting review — high confidence first for auto-approval.
 
-### vw_attribute_coverage
+### tl_vw_attribute_coverage
 Per-attribute breakdown of how many tracked products have each attribute filled (quality metric).
 
 ---

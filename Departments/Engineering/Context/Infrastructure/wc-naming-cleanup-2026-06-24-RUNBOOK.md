@@ -1,9 +1,12 @@
 # WC-naming cleanup — pending runbook (blocked on labgregor outage)
 
-**Status 2026-06-24:** `labgregor` unreachable (SSH port 22 timeout + n8n MCP `NO_RESPONSE`).
-Everything below is **authorised by the user but NOT yet applied** — execute in order when
-the host returns. The core column migration (`wc-naming-cleanup-2026-06-24.sql`) already
-ran and is verified; this runbook covers the remaining items.
+**Status: ✅ COMPLETE 2026-06-24.** All steps below ran and were verified once `labgregor`
+recovered (it was unreachable mid-session). Final state: 0 `vw_*` / 15 `tl_vw_*` views;
+Part A comments fixed; Part B index+constraint renamed; 3 active consumer workflows
+repointed to `tl_vw_*`. Executed SQL: `wc-naming-cleanup-2026-06-24-followup.sql` (A+B) and
+`wc-naming-cleanup-2026-06-24-views.sql` (views). One known leftover: archived workflow
+`[FROZEN-2026-05] TL_Price_Watchdog` still refs `vw_low_margin_products` (archived, inert).
+The steps below are retained as the executed record.
 
 ## 0. Connectivity gate
 - `ssh reganmcgregor@labgregor 'echo ok'` succeeds, and
