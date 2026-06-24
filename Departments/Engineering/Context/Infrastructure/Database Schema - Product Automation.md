@@ -2,8 +2,10 @@
 
 **Status:** Production (Phase 6.1-6.2), Phase 6.3 In Progress
 **Created:** 2026-02-01
-**Last Updated:** 2026-02-28
+**Last Updated:** 2026-06-24
 **SQL File:** [[Database Schema - Product Automation.sql]]
+
+> **Reconciled 2026-06-24** against the live Supabase schema after the Phase 13 WooCommerce decommission — dropped WC mirror tables removed; `wc_product_id`→`shopify_product_id`, `wc_product_url`→`product_url`, `mapped_wc_category_*`→`mapped_category_*`; views repointed to `tl_shopify_products_mirror`. The `wc_attribute_id` / `wc_slug` attribute keys are retained as live lookup keys (owned by the Product Enrichment Engine).
 
 ---
 
