@@ -47,7 +47,7 @@ Maps Leader categories to target categories with automation controls (gating, au
 
 ### 2. tl_onboarding_queue
 
-Staging queue for human review before products enter WooCommerce.
+Staging queue for human review before products are published to Shopify.
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -71,8 +71,8 @@ Staging queue for human review before products enter WooCommerce.
 | `width` | VARCHAR(50) | Product width |
 | `height` | VARCHAR(50) | Product height |
 | `warranty_length` | VARCHAR(100) | Warranty period |
-| `mapped_wc_category_id` | INTEGER | WooCommerce category from mapping |
-| `mapped_wc_category_name` | VARCHAR(255) | WooCommerce category name |
+| `mapped_category_id` | INTEGER | Mapped target category id (from `tl_category_map`) |
+| `mapped_category_name` | VARCHAR(255) | Mapped target category name |
 | `status` | VARCHAR(50) | Queue status (see below) |
 | `priority` | INTEGER | Publishing priority (1-100, higher first) |
 | `rejection_reason` | TEXT | Why product was rejected |
@@ -82,8 +82,8 @@ Staging queue for human review before products enter WooCommerce.
 | `reviewed_at` | TIMESTAMPTZ | When product was reviewed |
 | `reviewed_by` | VARCHAR(100) | Who reviewed the product |
 | `published_at` | TIMESTAMPTZ | When product was published |
-| `wc_product_id` | INTEGER | WooCommerce product ID after creation |
-| `wc_product_url` | TEXT | URL to product in WooCommerce |
+| `shopify_product_id` | INTEGER | Shopify product ID after creation |
+| `product_url` | TEXT | URL to product in Shopify |
 | `publish_error` | TEXT | Error message if publishing failed |
 | `raw_data` | JSONB | Full Leader feed data backup |
 
@@ -95,7 +95,7 @@ Staging queue for human review before products enter WooCommerce.
 | `rejected` | Will not be published |
 | `blocked` | Category is blocked |
 | `processing` | Currently being published |
-| `published` | Successfully created in WooCommerce |
+| `published` | Successfully created in Shopify |
 | `failed` | Publishing failed (check `publish_error`) |
 
 **Key Indexes:**
@@ -113,12 +113,12 @@ Tracks optimisation status for published products. Central tracking table for al
 | Column | Type | Description |
 |--------|------|-------------|
 | `id` | UUID | Primary key |
-| `wc_product_id` | INTEGER | WooCommerce product ID (unique) |
+| `shopify_product_id` | BIGINT | Shopify product ID (unique) |
 | `stock_code` | VARCHAR(100) | Leader stock code |
-| `sku` | VARCHAR(100) | WooCommerce SKU |
+| `sku` | VARCHAR(100) | Shopify SKU |
 | `original_raw_title` | VARCHAR(500) | Raw title from Leader |
 | `published_title` | VARCHAR(500) | Cleaned title we published |
-| `published_slug` | VARCHAR(500) | URL slug from WooCommerce |
+| `published_slug` | VARCHAR(500) | URL slug from Shopify |
 | `description_status` | VARCHAR(50) | Description optimisation status |
 | `original_description` | TEXT | Raw description from Leader |
 | `optimized_description` | TEXT | AI-generated description |
@@ -156,7 +156,7 @@ Tracks optimisation status for published products. Central tracking table for al
 - Product must be seen in feed within last 4 hours
 - Product must have stock (`availability_total > 0`)
 - Product must have a price (`dbp_inc_gst > 0`)
-- Product must NOT exist in WooCommerce (`tl_wc_products_mirror`)
+- Product must NOT exist in Shopify (`tl_shopify_products_mirror`)
 - Product must NOT already be in the queue (`tl_onboarding_queue`)
 - Category must NOT be blocked
 
@@ -186,7 +186,7 @@ Tracks optimisation status for published products. Central tracking table for al
 
 ### vw_unmapped_categories
 
-**Purpose:** Identifies Leader categories without WooCommerce mapping.
+**Purpose:** Identifies Leader categories without a target-category mapping.
 
 **Columns:**
 - `category_code` - Leader category code
@@ -225,7 +225,7 @@ tl_onboarding_queue                            |
         |                                      |
         | TL_Product_Publisher creates product |
         v                                      |
-tl_wc_products_mirror (existing) <─────────────┘
+tl_shopify_products_mirror (existing) <────────┘
         |
         | Creates record at publish time
         v
@@ -332,42 +332,28 @@ Scraped manufacturer page content. Scrape once, parse many times for future work
 
 ---
 
-### 5. tl_wc_attributes_mirror
+### 5. tl_attribute_mapping
 
-Mirror of WooCommerce global attribute definitions (`GET /products/attributes`).
-
-| Column | Type | Description |
-|--------|------|-------------|
-| `wc_attribute_id` | INTEGER PK | From WooCommerce |
-| `name` | VARCHAR(255) | e.g., "RAM", "Screen Size" |
-| `slug` | VARCHAR(255) UNIQUE | |
-| `type` | VARCHAR(50) | `select` |
-| `order_by` | VARCHAR(50) | |
-| `has_archives` | BOOLEAN | |
-| `category_scope` | TEXT[] | Which WC categories this applies to (local metadata) |
-| `unit` | VARCHAR(50) | e.g., "GB", "GHz", "inch" (local metadata) |
-| `last_synced_at` | TIMESTAMPTZ | |
-
----
-
-### 6. tl_wc_attribute_terms_mirror
-
-Mirror of WooCommerce attribute terms (`GET /products/attributes/<id>/terms`).
+The live **attribute dictionary** — the WC→Shopify crosswalk that replaced the dropped `tl_wc_attributes_mirror` and `tl_wc_attribute_terms_mirror` mirrors after the Phase 13 WooCommerce decommission. `wc_attribute_id` / `wc_slug` are retained as stable **lookup keys** (e.g. `pa_colour`); they no longer reference any WooCommerce table. Owned by the TechLoop Product Enrichment Engine project.
 
 | Column | Type | Description |
 |--------|------|-------------|
-| `wc_term_id` | INTEGER PK | From WooCommerce |
-| `wc_attribute_id` | INTEGER FK | → `tl_wc_attributes_mirror` |
-| `name` | VARCHAR(255) | e.g., "16GB", "14 inch" |
-| `slug` | VARCHAR(255) | |
-| `count` | INTEGER | Products using this term in WC |
-| `last_synced_at` | TIMESTAMPTZ | |
-
-**UNIQUE:** `(wc_attribute_id, slug)`
+| `id` | BIGINT PK | |
+| `wc_attribute_id` | INTEGER | Legacy lookup key (nullable); stable join key for `tl_product_attributes` / `tl_proposed_attributes` |
+| `wc_slug` | TEXT | Attribute slug, used as the display label (e.g. `pa_colour`) — there is no separate display-name column |
+| `shopify_namespace` | TEXT | Metafield namespace (`shopify` / `custom`) |
+| `shopify_key` | TEXT | Shopify metafield key |
+| `shopify_type` | TEXT | Shopify metafield type (e.g. `single_line_text_field`, `list.metaobject_reference`) |
+| `is_promoted` | BOOLEAN | |
+| `fan_out` | JSONB | Optional value fan-out rules |
+| `normalize_rules` | JSONB | Optional value normalisation rules |
+| `status` | TEXT | `active` / disabled |
+| `notes` | TEXT | |
+| `created_at` / `updated_at` | TIMESTAMPTZ | |
 
 ---
 
-### 7. tl_description_models
+### 6. tl_description_models
 
 Configurable LLM models for description generation. Supports Ollama, OpenRouter, Anthropic.
 
@@ -384,7 +370,7 @@ Configurable LLM models for description generation. Supports Ollama, OpenRouter,
 
 ---
 
-### 8. tl_proposed_attributes
+### 7. tl_proposed_attributes
 
 LLM-proposed new attributes or terms awaiting HITL approval via Slack.
 
@@ -393,72 +379,47 @@ LLM-proposed new attributes or terms awaiting HITL approval via Slack.
 | `id` | UUID PK | |
 | `proposal_type` | VARCHAR(50) | `new_attribute` / `new_term` |
 | `attribute_name` | VARCHAR(255) | For new attributes |
-| `wc_attribute_id` | INTEGER FK | For new terms (which attribute) |
+| `wc_attribute_id` | INTEGER | Legacy lookup key into `tl_attribute_mapping` (FK to the dropped WC mirror removed) |
 | `term_value` | VARCHAR(255) | For new terms |
 | `product_count` | INTEGER | How many products need this |
 | `example_products` | JSONB | Sample stock_codes |
 | `status` | VARCHAR(50) | `proposed` / `approved` / `rejected` / `mapped` |
 
----
-
-### 9. tl_attribute_aliases
-
-Maps alternative attribute names (from manufacturer specs, supplier data, or HITL corrections) to canonical WC attributes. Used by `TL_Enrich_Attributes` to resolve known synonyms before proposing new attributes.
-
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID PK | Default `gen_random_uuid()` |
-| `alias_name` | VARCHAR(255) NOT NULL | The alternative name (e.g., "Memory", "System Memory") |
-| `maps_to_wc_attribute_id` | INTEGER NOT NULL FK | → `tl_wc_attributes_mirror` (the canonical attribute) |
-| `source` | VARCHAR(50) | How the alias was created: `hitl_mapping` / `hitl_rejection` / `manual` |
-| `created_at` | TIMESTAMPTZ | Default `NOW()` |
-
-**UNIQUE:** `(alias_name)` — each alias maps to exactly one canonical attribute.
-
-**How aliases are created:**
-- **HITL mapping:** When `TL_Attribute_Proposer` shows a proposed new attribute in Slack, the reviewer can select "Map to Existing" from a dropdown instead of creating a new WC attribute. This inserts an alias.
-- **Manual:** Direct DB insert for known synonyms (e.g., "M/B Type" → "Motherboard Form Factor").
-
-**How aliases are consumed:**
-- `TL_Enrich_Attributes` fetches aliases via LEFT JOIN on the attribute dictionary query. Aliases appear in the LLM prompt as "(also known as: Memory, System Memory)" next to each attribute.
-- The Parse LLM Response node also builds a runtime alias lookup — if the LLM returns an alias name despite being told to use the canonical name, it resolves correctly instead of proposing a new attribute.
 
 ---
 
-### 10. tl_product_attributes
+### 8. tl_product_attributes
 
-Per-product attribute extraction results. Maps products to WC attributes with confidence scores.
+Per-product attribute extraction results. Maps products to attribute keys (via `tl_attribute_mapping`) with confidence scores.
 
 | Column | Type | Description |
 |--------|------|-------------|
 | `id` | UUID PK | |
-| `wc_product_id` | INTEGER | WooCommerce product ID |
+| `shopify_product_id` | BIGINT | Shopify product ID |
 | `stock_code` | VARCHAR(100) | Leader stock code |
-| `wc_attribute_id` | INTEGER FK | → `tl_wc_attributes_mirror` |
+| `wc_attribute_id` | INTEGER | Lookup key into `tl_attribute_mapping` (legacy; FK to the dropped WC mirror removed) |
+| `shopify_key` | TEXT | Shopify-native metafield key (alternative identity to `wc_attribute_id`) |
 | `raw_value` | TEXT | As extracted by LLM |
-| `normalized_value` | TEXT | Matched to existing term |
-| `wc_term_id` | INTEGER | NULL until matched to WC term |
+| `normalized_value` | TEXT | Matched to existing term/value |
 | `confidence` | NUMERIC(3,2) | 0.00–1.00 |
 | `source` | VARCHAR(50) | `llm_extraction` / `leader_feed` / `manual` |
 | `extraction_run` | INTEGER | Increments on re-extraction |
-| `review_status` | VARCHAR(50) | `pending` / `approved` / `rejected` / `pushed_to_wc` |
-| `pushed_to_wc_at` | TIMESTAMPTZ | |
+| `review_status` | VARCHAR(50) | `pending` / `approved` / `rejected` / `pushed_to_shopify` |
+| `pushed_to_shopify_at` | TIMESTAMPTZ | When approved values were pushed to Shopify |
 | `sent_to_slack_at` | TIMESTAMPTZ | When notification was sent to `#enrichment-review` *(Added 2026-02-21)* |
 | `slack_notification_count` | INTEGER | Number of times sent to Slack (default 0) *(Added 2026-02-21)* |
 
-**UNIQUE:** `(wc_product_id, wc_attribute_id, normalized_value)` *(Updated 2026-02-22 — allows multiple values per attribute per product; old constraint was `(wc_product_id, wc_attribute_id)`)*
+*(The live table also carries Shopify-native enrichment columns — `shopify_metaobject_gid`, `vocab_resolved` — added by the Product Enrichment Engine; see the live schema for the full set.)*
+
+**Partial UNIQUE indexes** *(Phase 13 — `wc_product_id`→`shopify_product_id`; allows multiple values per attribute per product)*:
+- `idx_product_attrs_attr_unique` — `(shopify_product_id, wc_attribute_id, normalized_value)` WHERE `wc_attribute_id IS NOT NULL`
+- `idx_product_attrs_shopify_native_unique` — `(shopify_product_id, shopify_key, normalized_value)` WHERE `shopify_key IS NOT NULL`
 
 **Notification Tracking (Added 2026-02-21):**
 - `sent_to_slack_at` tracks when the item was last sent to Slack for review
 - `slack_notification_count` increments each time a notification is sent
 - `TL_Enrichment_Reviewer` only sends items where `sent_to_slack_at IS NULL` OR `sent_to_slack_at < NOW() - INTERVAL '1 day'`
 - This prevents duplicate Slack messages every 4 hours for the same pending item
-
----
-
-### Modified Existing Table: tl_wc_products_mirror
-
-Added `attributes` JSONB column — mirrors WC product attributes array: `[{id, name, slug, position, visible, variation, options}]`. Synced by `TL_Mirror_WooCommerce`.
 
 ---
 
@@ -487,33 +448,24 @@ Per-attribute breakdown of how many tracked products have each attribute filled 
 ## Entity Relationship (Phase 6.3)
 
 ```
-tl_wc_attributes_mirror ←── TL_Mirror_WC_Attributes ←── WooCommerce /products/attributes
+tl_attribute_mapping  (attribute dictionary: wc_attribute_id / wc_slug → shopify_namespace/key/type)
         |
-        ├── FK
-        |   v
-        |  tl_wc_attribute_terms_mirror ←── WC /products/attributes/<id>/terms
-        |
-        ├── FK (maps_to_wc_attribute_id)
-        |   v
-        |  tl_attribute_aliases ←── HITL "Map to Existing" / manual inserts
-        |
-        ├── FK (wc_attribute_id)
+        ├── lookup key (wc_attribute_id)
         |   v
         |  tl_product_attributes ←── TL_Enrich_Attributes (LLM extraction)
-        |       UNIQUE(wc_product_id, wc_attribute_id, normalized_value)
-        |       review_status: pending → approved → pushed_to_wc
+        |       partial-unique (shopify_product_id, wc_attribute_id, normalized_value) WHERE wc_attribute_id IS NOT NULL
+        |       partial-unique (shopify_product_id, shopify_key, normalized_value)     WHERE shopify_key IS NOT NULL
+        |       review_status: pending → approved → pushed (pushed_to_shopify_at)
         |
-        └── FK (wc_attribute_id)
+        └── lookup key (wc_attribute_id)
             v
-           tl_proposed_attributes ←── TL_Attribute_Proposer (HITL via Slack)
-                status: proposed → approved/rejected/mapped
+           tl_proposed_attributes  (HITL proposals; status: proposed → approved/rejected/mapped)
 
 tl_manufacturer_raw_data ←── TL_Scraper (Crawl4AI — Playwright, stealth mode)
         |  UNIQUE(stock_code, source_url) — multiple rows per product supported
-        |
-        | markdown_content → feeds TL_Enrich_Attributes + TL_Enrich_Descriptions
-        | scraped_images   → feeds TL_Enrich_Images
-        | raw_html         → archival (scrape once, parse many times)
+        |  markdown_content → feeds TL_Enrich_Attributes + TL_Enrich_Descriptions
+        |  scraped_images   → feeds TL_Enrich_Images
+        |  raw_html         → archival (scrape once, parse many times)
 
 tl_description_models ←── configurable LLM selection for descriptions
 ```
