@@ -37,3 +37,29 @@
 - **STEP 4 PUSH ✅ VALIDATED EARLY (live).** Ran the gate on extracted-so-far: queued 266 rows / 18 products / 16 cats (98% vocab-match; only 5 no-match held). Fired W8 → **193 metafields LIVE across 13+ categories** (Laptops 71, Motherboards, Video Cards, Desktops, CPU Coolers, HDDs, Monitor Arms, NICs, Keyboards, CPUs, Hubs&Switches, Cable Trays), **44 failed in isolation = all `connection-type`** ("Owner subtype does not match" category-constraint) + 1 `monitor-screen-specialized-features`. Isolation works perfectly. The 29 'none' stragglers = benign race with the still-running extractor (re-touched→pending), ALL join to mirror fine (no silent drop). FULL CHAIN PROVEN on new categories.
 - **FINAL-PUSH PLAN (when drain done):** (1) DEACTIVATE extractor first (avoid the gate/extract race). (2) Final gate = same confident filter BUT exclude (taxonomy_gid,attr_key) combos with a prior `failed` Owner-subtype row (auto-skip connection-type etc.). (3) Fire W8 / let its 5-min schedule push. (4) Verify spread, write report. connection-type/monitor-screen-specialized-features = W8 custom-routing follow-up (not tonight).
 - LEFT RUNNING: extractor schedule (draining), drain poller bg `bqgldykq8`, W8 active (schedule 5min). Seeder left active (idle, queue empty).
+
+---
+
+## ✅ FINAL RESULTS (run complete)
+
+**Extraction:** drained to remaining=0 — **12,160 attribute rows across all 74 categories** (every categorised product).
+
+**Push (12 batches, gate-80-products → W8, auto-excluding Owner-subtype combos):**
+
+| Outcome | Count |
+|---|---|
+| **Metafields LIVE on Shopify** | **10,612** |
+| Products enriched live | **960** |
+| Categories enriched live | **73** |
+| Failed (isolated constraint mismatch) | 167 |
+| Held for review (no exact vocab match) | 1,379 rows / 332 products |
+
+**Top live categories:** Cases 182 · Video Cards 87 · Laptops 80 · Network Cables 71 · RAM 50 · SSDs 49 · CPUs 36 · Monitors 26 · Mice 21 · Keyboards 20 · Surveillance Cameras 19 · Headsets 13 · Phone Cases 12 · NICs 12 · HDMI Cables 11 · USB Adapters 11 · Routers 10 · Monitor Arms 10 · Motherboards 8 · Power Banks 8 · Access Points 7 · Smartphones 6 · Tablets 6 … (73 total).
+
+**Failed keys (167, all isolated, siblings still pushed):** connection-type 151 · connectivity-technology 10 · + 6 singletons. Cause = standard def constrained to a different taxonomy subtype ("Owner subtype does not match"). **FOLLOW-UP:** W8 should route these to `custom.*`/skip, OR re-enable the def for the right categories. Not blocking — values just didn't land for that one field.
+
+**Held for review (1,379 rows / 332 products):** gemma's value didn't exactly match a seeded entry (e.g. "Other", phrasing variant) → deliberately NOT auto-pushed. These are what the owner reviews via the editable Slack card when the paced stream is re-opened.
+
+**Workflow end state:** extractor INACTIVE, seeder INACTIVE (queue empty), W8 ACTIVE (5-min schedule, idle since queue empty), W6/W7 review path unchanged (paused). Nothing auto-pushes further until the owner re-opens the stream or re-gates.
+
+**Verification basis:** push_status='pushed' is set only on `metafieldsSet` returning zero userErrors → Shopify confirmed each of the 10,612.
