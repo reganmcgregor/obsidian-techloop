@@ -41,12 +41,16 @@ sudo tailscale down
 ## System Specifications
 
 - **OS:** Ubuntu 25.04 (Plucky Panda)
-- **Kernel:** 6.14.0-37-generic
+- **Kernel:** 6.17.0-40-generic
 - **Architecture:** x86_64
-- **RAM:** 30 GB (~20 GB available)
-- **Disk:** 466 GB (140 GB used, 307 GB free — 32% used)
-- **GPU:** NVIDIA GeForce RTX 3060 (12 GB VRAM)
-- **NVIDIA Driver:** 570.195.03
+- **CPU:** Intel LG A1700 (new build)
+- **RAM:** 30 GB DDR4 (~20 GB available)
+- **Disk:** 466 GB SSD (140 GB used, 307 GB free — 32% used)
+- **GPUs:** 2× NVIDIA GeForce RTX 3060 12GB (24GB VRAM total)
+  - GPU 0: PCIe 0000:01:00.0
+  - GPU 1: PCIe 0000:04:00.0
+- **NVIDIA Driver:** 570.195.03, CUDA 12.8
+- **NVIDIA Persistence Mode:** Enabled (via `nvidia-persistenced`)
 
 ## Running Services
 
@@ -105,10 +109,12 @@ sudo tailscale down
 - **Use Case:** LLM interface
 
 ### Ollama (LLM Server)
-- **Location:** `~/ollama/docker-compose.yml`
-- **Container:** `ollama_cloudflared_tunnel`
-- **Config:** `~/.ollama/`
-- **Use Case:** Local LLM inference (RTX 3060)
+- **Location:** `~/ollama/docker-compose.yml` (Cloudflare tunnel only — Ollama runs on host)
+- **Host service:** `/etc/systemd/system/ollama.service`
+- **Config:** `~/.ollama/`, override at `/etc/systemd/system/ollama.service.d/override.conf`
+- **Use Case:** Local LLM inference across both RTX 3060 GPUs
+- **Dual-GPU sharding:** `CUDA_VISIBLE_DEVICES=0,1`, `OLLAMA_NUM_GPU=999` — shards large models across both GPUs automatically
+- **VRAM capacity:** 24GB total; can run models up to ~22GB (Q4 quantised) e.g. Qwen3 30B, Gemma 4 27B+
 - **Models:**
   - `qwen2.5:14b` — 9.0 GB, general text generation
   - `llama3.1:latest` — 4.9 GB, text generation
