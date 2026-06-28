@@ -206,8 +206,11 @@ All services are routed through Nginx Proxy Manager with Cloudflare tunnels:
 
 ## Notes
 
+- **Hardware upgrade (2026-06):** Machine rebuilt with Intel LG A1700, DDR4, new motherboard, SSD, and second RTX 3060 added — total VRAM now 24GB
 - **Disk:** LVM expanded from 100 GB to 466 GB (2026-02-04)
-- **GPU:** RTX 3060 available for CUDA workloads (Open WebUI, Ollama)
+- **GPUs:** 2× RTX 3060 available for CUDA workloads (Open WebUI, Ollama with model sharding)
+- **cpu-monitor.service disabled (2026-06):** Was a workaround for old hardware killing runaway VSCode/ripgrep processes — not needed on new hardware
+- **NVIDIA persistence mode enabled:** `nvidia-persistenced` keeps GPU driver resident for fast model loading
 - All services use Docker containers managed through docker-compose
 - Cloudflare tunnels provide external access to services
 - Most services have dedicated PostgreSQL databases
@@ -251,5 +254,5 @@ docker exec glances glances --help
 
 ---
 
-*Last updated: 2026-06-18*
+*Last updated: 2026-06-28*
 *Created by: Claude Code*
