@@ -43,7 +43,7 @@ sudo tailscale down
 - **OS:** Ubuntu 25.04 (Plucky Panda)
 - **Kernel:** 6.17.0-40-generic
 - **Architecture:** x86_64
-- **CPU:** Intel LG A1700 (new build)
+- **CPU:** Intel LG A1700 (new build) + Arctic Freezer 36 A-RGB Push-Pull cooler (idle ~28°C)
 - **RAM:** 30 GB DDR4 (~20 GB available)
 - **Disk:** 466 GB SSD (140 GB used, 307 GB free — 32% used)
 - **GPUs:** 2× NVIDIA GeForce RTX 3060 12GB (24GB VRAM total)
@@ -114,9 +114,13 @@ sudo tailscale down
 - **Config:** `~/.ollama/`, override at `/etc/systemd/system/ollama.service.d/override.conf`
 - **Use Case:** Local LLM inference across both RTX 3060 GPUs
 - **Dual-GPU sharding:** `CUDA_VISIBLE_DEVICES=0,1`, `OLLAMA_NUM_GPU=999` — shards large models across both GPUs automatically
+- **Default context:** `OLLAMA_NUM_CTX=8192` — global default; override per-model or per-call as needed
 - **VRAM capacity:** 24GB total; can run models up to ~22GB (Q4 quantised) e.g. Qwen3 30B, Gemma 4 27B+
+- **Verified:** qwen3:30b loads ~7.8GB on each GPU (15.7GB total)
 - **Models:**
+  - `qwen3:30b` — 19.0 GB, large reasoning (shards across both GPUs)
   - `qwen2.5:14b` — 9.0 GB, general text generation
+  - `gemma4:12b` — 7.6 GB, general (also `gemma4:12b-it-qat` 7.2GB)
   - `llama3.1:latest` — 4.9 GB, text generation
   - `qwen3:latest` — 5.2 GB
   - `deepseek-r1:latest` — 5.2 GB, reasoning
@@ -206,7 +210,7 @@ All services are routed through Nginx Proxy Manager with Cloudflare tunnels:
 
 ## Notes
 
-- **Hardware upgrade (2026-06):** Machine rebuilt with Intel LG A1700, DDR4, new motherboard, SSD, and second RTX 3060 added — total VRAM now 24GB
+- **Hardware upgrade (2026-06):** Machine rebuilt with Intel LG A1700, DDR4, new motherboard, SSD, and second RTX 3060 added — total VRAM now 24GB. Arctic Freezer 36 A-RGB installed — CPU now idles at ~28°C
 - **Disk:** LVM expanded from 100 GB to 466 GB (2026-02-04)
 - **GPUs:** 2× RTX 3060 available for CUDA workloads (Open WebUI, Ollama with model sharding)
 - **cpu-monitor.service disabled (2026-06):** Was a workaround for old hardware killing runaway VSCode/ripgrep processes — not needed on new hardware
@@ -234,7 +238,7 @@ cd ~/supabase/docker && docker compose --env-file ~/supabase/.env restart kong
 docker exec supabase-db psql -U postgres -d postgres -c "SELECT 1;"
 
 # List Ollama models
-docker exec ollama_cloudflared_tunnel ollama list
+ollama list
 
 # Check GPU usage
 nvidia-smi
@@ -254,5 +258,5 @@ docker exec glances glances --help
 
 ---
 
-*Last updated: 2026-06-28*
+*Last updated: 2026-06-29*
 *Created by: Claude Code*
